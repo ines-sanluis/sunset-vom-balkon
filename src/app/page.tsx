@@ -60,8 +60,7 @@ export default async function Home() {
 
   let nextDayLabel = "";
   let nextTimeLabel = "";
-  let inviteMessage =
-    "Sieht so aus, als gäbe es heute einen schönen Sonnenuntergang. Kommst du vorbei und schaust ihn dir mit mir an?";
+  let inviteMessage = "";
 
   if (next?.time) {
     const now = new Date();
@@ -93,16 +92,92 @@ export default async function Home() {
     });
 
     if (window) {
-      const startLocal = formatInBerlin(window.startIso, {
+      // Round start time to a more natural hour
+      const startTime = new Date(window.startIso);
+      const startHour = startTime.getHours();
+      const startMinutes = startTime.getMinutes();
+
+      // Round to nearest 15 minutes or to the hour if close
+      let roundedTime;
+      if (startMinutes <= 7) {
+        roundedTime = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          startHour,
+          0,
+        );
+      } else if (startMinutes <= 22) {
+        roundedTime = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          startHour,
+          15,
+        );
+      } else if (startMinutes <= 37) {
+        roundedTime = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          startHour,
+          30,
+        );
+      } else if (startMinutes <= 52) {
+        roundedTime = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          startHour,
+          45,
+        );
+      } else {
+        roundedTime = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          startHour + 1,
+          0,
+        );
+      }
+
+      const roundedTimeLocal = formatInBerlin(roundedTime.toISOString(), {
         hour: "2-digit",
         minute: "2-digit",
       });
-      const endLocal = formatInBerlin(window.endIso, {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      inviteMessage = `Sieht so aus, als gäbe es heute einen schönen Sonnenuntergang. Hast du zwischen ${startLocal} und ${endLocal} Zeit vorbeizukommen?`;
+
+      // Generate invitation message with time and quality information
+      const quality = next?.quality_text?.toLowerCase();
+      if (quality === "poor" || quality === "fair") {
+        inviteMessage = `Der Sonnenuntergang ${nextDayLabel.toLowerCase()} sieht nicht so spektakulär aus, aber es wäre trotzdem schön, wenn du kommst. Hast du so gegen ${roundedTimeLocal} Zeit?`;
+      } else if (
+        quality === "good" ||
+        quality === "great" ||
+        quality === "excellent"
+      ) {
+        inviteMessage = `Sieht so aus, als gäbe es ${nextDayLabel.toLowerCase()} einen schönen Sonnenuntergang. Hast du so gegen ${roundedTimeLocal} Zeit vorbeizukommen?`;
+      } else {
+        inviteMessage = `Hast du so gegen ${roundedTimeLocal} Zeit vorbeizukommen und den Sonnenuntergang mit mir anzuschauen?`;
+      }
+    } else {
+      // Generate invitation message without time information
+      const quality = next?.quality_text?.toLowerCase();
+      if (quality === "poor" || quality === "fair") {
+        inviteMessage = `Der Sonnenuntergang ${nextDayLabel.toLowerCase()} sieht nicht so spektakulär aus, aber es wäre trotzdem schön, wenn du kommst. Magst du vorbeikommen?`;
+      } else if (
+        quality === "good" ||
+        quality === "great" ||
+        quality === "excellent"
+      ) {
+        inviteMessage = `Sieht so aus, als gäbe es ${nextDayLabel.toLowerCase()} einen schönen Sonnenuntergang. Kommst du vorbei und schaust ihn dir mit mir an?`;
+      } else {
+        inviteMessage = `Kommst du vorbei und schaust dir den Sonnenuntergang mit mir an?`;
+      }
     }
+  } else {
+    // Fallback when no sunset data is available
+    inviteMessage =
+      "Kommst du vorbei und schaust dir den Sonnenuntergang mit mir an?";
   }
 
   return (
