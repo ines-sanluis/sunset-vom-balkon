@@ -87,7 +87,7 @@ export async function getSunsetForecast({
         ) {
           throw new Error("QUOTA_EXCEEDED");
         }
-      } catch () {
+      } catch {
         // If parsing fails, fall through to generic error
       }
     }
