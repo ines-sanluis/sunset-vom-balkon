@@ -47,8 +47,12 @@ export default async function Home() {
   try {
     forecast = await getSunsetForecast({ days: 3, type: "sunset" });
   } catch (e) {
-    errorMessage =
-      e instanceof Error ? e.message : "Could not load Sunsethue data.";
+    if (e instanceof Error && e.message === "QUOTA_EXCEEDED") {
+      errorMessage = "QUOTA_EXCEEDED";
+    } else {
+      errorMessage =
+        e instanceof Error ? e.message : "Could not load Sunsethue data.";
+    }
   }
 
   const next = pickNextEvent(forecast?.data ?? []);
@@ -129,19 +133,40 @@ export default async function Home() {
 
         {errorMessage && (
           <section className="rounded-3xl bg-white/10 p-5 text-white ring-1 ring-white/20 backdrop-blur">
-            <div className="text-sm font-semibold uppercase tracking-wide text-white">
-              Konfiguration erforderlich
-            </div>
-            <p className="mt-2 text-sm text-white/80">
-              Füge{" "}
-              <span className="font-mono text-white">SUNSETHUE_API_KEY</span> in{" "}
-              <span className="font-mono text-white">.env.local</span> unter{" "}
-              <span className="font-mono text-white">
-                projects/sunset-in-munich
-              </span>{" "}
-              hinzu.
-            </p>
-            <p className="mt-2 text-xs text-white/60">{errorMessage}</p>
+            {errorMessage === "QUOTA_EXCEEDED" ? (
+              <>
+                <div className="text-sm font-semibold uppercase tracking-wide text-white">
+                  Tageslimit erreicht
+                </div>
+                <p className="mt-2 text-sm text-white/80">
+                  Das tägliche Limit für Sonnenuntergang-Vorhersagen wurde
+                  erreicht.
+                </p>
+                <p className="mt-2 text-sm text-white/90 font-medium">
+                  🌅 Komm morgen wieder vorbei für die neuesten
+                  Sonnenuntergang-Daten!
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-sm font-semibold uppercase tracking-wide text-white">
+                  Konfiguration erforderlich
+                </div>
+                <p className="mt-2 text-sm text-white/80">
+                  Füge{" "}
+                  <span className="font-mono text-white">
+                    SUNSETHUE_API_KEY
+                  </span>{" "}
+                  in <span className="font-mono text-white">.env.local</span>{" "}
+                  unter{" "}
+                  <span className="font-mono text-white">
+                    projects/sunset-in-munich
+                  </span>{" "}
+                  hinzu.
+                </p>
+                <p className="mt-2 text-xs text-white/60">{errorMessage}</p>
+              </>
+            )}
           </section>
         )}
 
