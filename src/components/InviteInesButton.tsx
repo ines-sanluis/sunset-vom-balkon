@@ -10,16 +10,16 @@ export function InviteInesButton({
   className?: string;
 }) {
   const onClick = useCallback(async () => {
-    try {
-      if (navigator.share) {
+    if (navigator.share) {
+      try {
         await navigator.share({
           title: "Einladung zum Sonnenuntergang",
           text: message,
         });
-        return;
+      } catch {
+        // user cancelled or share failed; do nothing
       }
-    } catch {
-      // user cancelled share; just return silently
+      return;
     }
 
     // Fallback: show the text so it can be selected / shared manuell
