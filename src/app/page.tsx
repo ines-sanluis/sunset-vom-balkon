@@ -11,7 +11,7 @@ import { InviteInesButton } from "@/components/InviteInesButton";
 const QUALITY_LABEL_DE: Record<string, string> = {
   poor: "schwach",
   fair: "okay",
-  good: "g̶u̶t̶ sehr schön",
+  good: "gut (alias sehr schön)",
   great: "sehr gut",
   excellent: "ausgezeichnet",
 };
